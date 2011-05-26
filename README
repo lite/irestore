@@ -1,0 +1,94 @@
+TODO
+----
+tss
+ipainstaller
+
+INFO
+----
+#libimobiledevice
+/usr/local/Cellar/libimobiledevice/1.1.1/lib/libimobiledevice.2.dylib
+b lockdownd_client_new_with_handshake
+b lockdownd_client_new
+
+#libplist
+/usr/local/Cellar/libplist/1.3/lib/libplist.1.1.3.dylib
+set print elements 0
+b xplist.c:387
+command 1
+>p tmp
+>c
+>end
+b plist_to_bin
+b plist_to_xml
+
+#libusbmuxd
+/usr/local/Cellar/usbmuxd/1.0.7/lib/libusbmuxd.1.0.7.dylib
+tcp 27015, not /var/run/usbmuxd
+
+#ribusb
+ln -sf ribusb/lib lib
+
+#use socat and idevicesyslog
+```
+sudo /System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/Resources/usbmuxd &
+socat -v tcp-l:27015,reuseaddr,fork unix:/var/rusbmuxd
+idevicesyslog
+```
+
+# idevicerestore
+https://github.com/boxingsquirrel/idevicerestore
+./idevicerestore -s -d ~/ipad/jailbreak/iPhone2,1_4.3.3_8J2_Restore.ipsw 
+
+# ideviceactivate
+https://github.com/boxingsquirrel/ideviceactivate
+
+# ideviceinstaller
+http://git.sukimashita.com/ideviceinstaller.git
+                
+# osx-plist
+https://github.com/kballard/osx-plist
+
+# gistfile1.rb
+https://gist.github.com/raw/149443/6b6519981f83c31c10db722ea31c069ef089aa31/gistfile1.rb        
+                                        
+# saurik
+http://svn.saurik.com/repos/menes/trunk/
+
+# theOS
+https://github.com/DHowett/theos
+
+# FirmExtract
+https://github.com/boxingsquirrel/FirmExtract
+
+# Chameleon
+https://github.com/BigZaphod/Chameleon.git
+
+# ARMBootloader
+https://github.com/AlJaMa/ARMBootloader
+
+# chronic-dev
+https://github.com/Chronic-Dev/
+https://github.com/Chronic-Dev/greenpois0n
+
+# comex
+https://github.com/comex
+
+# msftguy
+https://github.com/msftguy
+
+# posixninja
+https://github.com/posixninja
+
+# iH8sn0w
+https://github.com/iH8sn0w
+https://github.com/iH8sn0w/sn0wbreeze/tree/master/Resources
+
+# planetbeing
+https://github.com/planetbeing
+
+# cmwdotme
+https://github.com/cmwdotme   
+                              
+# Gojohnnyboi 
+https://github.com/Gojohnnyboi
+

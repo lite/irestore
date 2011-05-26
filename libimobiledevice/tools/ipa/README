@@ -1,0 +1,64 @@
+# ideviceinstaller
+-l -o list_all
+-i "Linux 1.2.ipa"
+-u com.evolonix.Linux-Reference-Guide
+
+-a com.evolonix.Linux-Reference-Guide
+-r com.evolonix.Linux-Reference-Guide
+-R com.evolonix.Linux-Reference-Guide
+
+<key>Request</key>\n\t<string>StartService</string>\n\t<key>Service</key>\n\t<string>com.apple.mobile.installation_proxy</string>\n</dict>\n</plist>\n"
+
+
+<key>Command</key><string>Browse</string></dict></plist>"
+
+<plist version=\"1.0\"><dict>
+<key>CurrentAmount</key><integer>10</integer>
+<key>CurrentIndex</key><integer>0</integer>
+<key>CurrentList</key><array>
+	<dict>
+		<key>ApplicationType</key><string>System</string>
+		<key>BuildMachineOSBuild</key><string>10A433</string>
+		<key>CFBundleDevelopmentRegion</key><string>English</string>
+		<key>CFBundleExecutable</key><string>DemoApp</string>
+		<key>CFBundleIdentifier</key><string>com.apple.DemoApp</string>
+		<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+		<key>CFBundlePackageType</key><string>APPL</string>
+		<key>CFBundleResourceSpecification</key><string>ResourceRules.plist</string>
+		<key>CFBundleShortVersionString</key><string>1.0.0</string>
+		<key>CFBundleSignature</key><string>????</string>
+		<key>CFBundleSupportedPlatforms</key><array><string>iPhoneOS</string></array>
+		<key>CFBundleVersion</key><string>1.0</string>
+		<key>DTCompiler</key><string>4.2</string>
+		<key>DTPlatformBuild</key><string></string>
+		<key>DTPlatformName</key><string>iphoneos</string>
+		<key>DTPlatformVersion</key><string>4.3</string>
+		<key>DTSDKBuild</key><string>8F177</string>
+		<key>DTSDKName</key><string>iphoneos4.3.internal</string>
+		<key>DTXcode</key><string>0400</string>
+		<key>DTXcodeBuild</key><string>10M2515</string>
+		<key>MinimumOSVersion</key><string>4.3</string>
+		<key>Path</key><string>/Applications/DemoApp.app</string>
+		<key>SBAppTags</key><array><string>hidden</string></array>
+		<key>UIApplicationExitsOnSuspend</key><true/>
+		<key>UIDeviceFamily</key><array><integer>1</integer><integer>2</integer></array>
+		<key>UIStatusBarHidden</key><true/>
+	</dict>
+</array>
+</dict></plist>"
+
+<plist version="1.0">
+<dict>
+	<key>ApplicationIdentifier</key>
+	<string>com.evolonix.Linux-Reference-Guide</string>
+	<key>Command</key>
+	<string>Uninstall</string>
+</dict>
+</plist>
+
+<plist version=\"1.0\">\n<dict>\n\t<key>ApplicationIdentifier</key>\n\t<string>com.evolonix.Linux-Reference-Guide</string>\n\t<key>ClientOptions</key>\n\t<dict>\n\t\t<key>SkipUninstall</key>\n\t\t<true/>\n\t</dict>\n\t<key>Command</key>\n\t<string>Archive</string>\n</dict>\n</plist>\n"
+
+<plist version=\"1.0\">\n<dict>\n\t<key>ApplicationIdentifier</key>\n\t<string>com.evolonix.Linux-Reference-Guide</string>\n\t<key>Command</key>\n\t<string>Restore</string>\n</dict>\n</plist>\n"
+
+<plist version=\"1.0\">\n<dict>\n\t<key>ApplicationIdentifier</key>\n\t<string>com.evolonix.Linux-Reference-Guide</string>\n\t<key>Command</key>\n\t<string>RemoveArchive</string>\n</dict>\n</plist>\n"
+

@@ -1,0 +1,25 @@
+#gdb ./iproxy
+
+$i sharedlibrary
+$b iproxy.c:197
+$i breakpoints
+$d breakpoints
+$add-symbol-file ../src/libusbmuxd.o
+$directory ../src 
+$b libusbmuxd.c:793
+$r 2222 32498
+
+$p/d port
+$p payload_size
+$set print elements 0
+$x/s payload
+
+#./iproxy 2222 62078
+
+# gdb ./ideviceinfo
+$b xplist.c:387
+$commands 8
+>p tmp
+>c
+>end
+$c

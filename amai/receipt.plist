@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Alignment</key>
+	<dict>
+		<key>AllFlash</key>
+		<string>Firmware/all_flash/all_flash.n88ap.production</string>
+		<key>DFUFileType</key>
+		<string>RELEASE</string>
+		<key>DeviceTree</key>
+		<string>Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3</string>
+		<key>KernelCache</key>
+		<string>kernelcache.release.n88</string>
+		<key>OS</key>
+		<string>038-1417-003.dmg</string>
+		<key>RestoreDeviceTree</key>
+		<string>Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3</string>
+		<key>RestoreKernelCache</key>
+		<string>kernelcache.release.n88</string>
+		<key>RestoreRamDisk</key>
+		<string>038-1447-003.dmg</string>
+	</dict>
+	<key>Linked</key>
+	<array>
+		<string>038-1417-003.dmg</string>
+		<string>Restore.plist</string>
+		<string>BuildManifest.plist</string>
+		<string>Firmware/device_map.txt</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/manifest</string>
+	</array>
+	<key>Personalized</key>
+	<array>
+		<string>Firmware/all_flash/all_flash.n88ap.production/applelogo.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3</string>
+		<string>kernelcache.release.n88</string>
+		<string>038-1447-003.dmg</string>
+		<string>Firmware/dfu/iBEC.n88ap.RELEASE.dfu</string>
+		<string>Firmware/dfu/iBSS.n88ap.RELEASE.dfu</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/batterylow1.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/batterylow0.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/LLB.n88ap.RELEASE.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/iBoot.n88ap.RELEASE.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/batterycharging1.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/glyphcharging.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/glyphplugin.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/batteryfull.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/batterycharging0.s5l8920x.img3</string>
+		<string>Firmware/all_flash/all_flash.n88ap.production/recoverymode.s5l8920x.img3</string>
+		<string>amai/apticket.der</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,50 @@
+Converted Binary PList: {
+    CFBundleDevelopmentRegion = English;
+    CFBundleDisplayName = Linux;
+    CFBundleExecutable = "Linux Reference Guide";
+    CFBundleIconFiles =     (
+        "Icon.png",
+        "Icon@2x.png",
+        "Icon-72.png",
+        "Icon-Small.png",
+        "Icon-Small@2x.png",
+        "Icon-Small-50.png"
+    );
+    CFBundleIdentifier = "com.evolonix.Linux-Reference-Guide";
+    CFBundleInfoDictionaryVersion = "6.0";
+    CFBundleName = "Linux Reference Guide";
+    CFBundlePackageType = APPL;
+    CFBundleResourceSpecification = "ResourceRules.plist";
+    CFBundleSignature = "????";
+    CFBundleSupportedPlatforms =     (
+        iPhoneOS
+    );
+    CFBundleVersion = "1.2";
+    DTCompiler = "4.2";
+    DTPlatformBuild = 8C134;
+    DTPlatformName = iphoneos;
+    DTPlatformVersion = "4.2 Seed 2";
+    DTSDKName = "iphoneos4.2";
+    DTXcode = 0325;
+    DTXcodeBuild = 10M2423;
+    LSRequiresIPhoneOS = 1;
+    MinimumOSVersion = "4.0";
+    NSMainNibFile = "MainWindow_iPhone";
+    "NSMainNibFile~ipad" = "MainWindow_iPad";
+    UIDeviceFamily =     (
+        1,
+        2
+    );
+    UIPrerenderedIcon = 1;
+    UISupportedInterfaceOrientations =     (
+        UIInterfaceOrientationPortrait,
+        UIInterfaceOrientationLandscapeLeft,
+        UIInterfaceOrientationLandscapeRight
+    );
+    "UISupportedInterfaceOrientations~ipad" =     (
+        UIInterfaceOrientationPortrait,
+        UIInterfaceOrientationPortraitUpsideDown,
+        UIInterfaceOrientationLandscapeLeft,
+        UIInterfaceOrientationLandscapeRight
+    );
+}
