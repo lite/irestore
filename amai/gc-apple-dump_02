@@ -1,0 +1,51 @@
+2011-05-29 19:45:20 [replay] POST https://albert.apple.com/WebObjects/ALUnbrick.woa/wa/ALActivationMonitor/checkUnbrickHealth                                                                             
+2011-05-29 20:45:22    <- 200 text/xml, 237B                                                                                                                                                              
+Request                                                                                               Response                                                                                            
+accept-encoding:         gzip                                                                                                                                                                             
+accept-language:         en-us, en;q=0.50                                                                                                                                                                 
+connection:              close                                                                                                                                                                            
+content-length:          347                                                                                                                                                                              
+content-type:            application/x-apple-plist                                                                                                                                                        
+cookie:                  NSC_bmvocsjdl_qspe-mc=44cf9618a9dc; mzf_in=061511; Pod=6; s_vnum_us=ch%3Dsafari%26vn%3D1%3Bch%3Dno%20channel%26vn%3D1%3B; s_membership=1%3Ait;                                   
+s_vi=[CS]v1|26CF8FEF85013DA3-60000107E0075498[CE]                                                                                                                                                         
+host:                    albert.apple.com                                                                                                                                                                 
+proxy-connection:        close                                                                                                                                                                            
+user-agent:              iTunes/10.2.2 (Macintosh; Intel Mac OS X 10.6.7) AppleWebKit/533.21.1                                                                                                            
+x-apple-store-front:     143465-2,12                                                                                                                                                                      
+x-apple-tz:              28800                                                                                                                                                                            
+                                                                                                                                                                                                          
+                                                                                                                                                                                                          
+<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                    
+<plist version="1.0">                                                                                                                                                                                     
+<dict>                                                                                                                                                                                                    
+?<key>ECID</key>                                                                                                                                                                                          
+?<integer>86872710412</integer>                                                                                                                                                                           
+?<key>ICCID</key>                                                                                                                                                                                         
+?<string>89860109158380264868</string>                                                                                                                                                                    
+?<key>IMEI</key>                                                                                                                                                                                          
+?<string>012037007915703</string>                                                                                                                                                                         
+?<key>IMSI</key>                                                                                                                                                                                          
+?<string>460018445986486</string>                                                                                                                                                                         
+?<key>SerialNumber</key>                                                                                                                                                                                  
+?<string>889437758M8</string>                                                                                                                                                                             
+</dict>                                                                                                                                                                                                   
+</plist>
+
+
+2011-05-29 19:45:20 [replay] POST https://albert.apple.com/WebObjects/ALUnbrick.woa/wa/ALActivationMonitor/checkUnbrickHealth                                                                             
+2011-05-29 20:45:22    <- 200 text/xml, 237B                                                                                                                                                              
+Request                                                                                               Response                                                                                            
+connection:                   keep-alive                                                                                                                                                                  
+content-length:               237                                                                                                                                                                         
+content-type:                 text/xml; charset=UTF-8                                                                                                                                                     
+x-webobjects-loadaverage:     12                                                                                                                                                                          
+                                                                                                                                                                                                          
+                                                                                                                                                                                                          
+<?xml version="1.0" encoding="UTF-8"?>                                                                                                                                                                    
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">                                                                                                    
+<plist version="1.0">                                                                                                                                                                                     
+<dict>                                                                                                                                                                                                    
+   <key>Status</key>                                                                                                                                                                                      
+   <string>UP</string>                                                                                                                                                                                    
+</dict>                                                                                                                                                                                                   
+</plist>                                                                                                                                                                                                  

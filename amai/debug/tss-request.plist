@@ -7,11 +7,11 @@
 	<key>@BBTicket</key>
 	<true/>
 	<key>@HostIpAddress</key>
-	<string>192.168.0.1</string>
+	<string>172.16.191.1</string>
 	<key>@HostPlatformInfo</key>
-	<string>windows</string>
+	<string>mac</string>
 	<key>@UUID</key>
-	<string>BD95B16E-BCE5-754D-9409-50B774999C15</string>
+	<string>8DB11D4A-1003-4F6E-B501-16DC1BB7EF7E</string>
 	<key>@VersionInfo</key>
 	<string>libauthinstall-68.1</string>
 	<key>ApBoardID</key>

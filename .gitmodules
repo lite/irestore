@@ -1,0 +1,6 @@
+[submodule "tools/mitmproxy"]
+	path = tools/mitmproxy
+	url = git://github.com/cortesi/mitmproxy.git
+[submodule "tools/rverse"]
+	path = tools/rverse
+	url = git://github.com/copumpkin/rverse.git

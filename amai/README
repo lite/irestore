@@ -1,0 +1,26 @@
+MITM on iTunes
+====
+          
+[mitmproxy]http://corte.si/posts/code/mitmproxy/tute-30-seconds.html
+
+mitmdump
+----
++ mitmdump -w gc-apple-dump
++ set proxy 127.0.0.1 8080
++ open ituens
++ ctrl+c
+    
+mitmproxy
+----
++ set proxy none
++ mimtproxy
+
+```
+c gc-apple-dump  --client replay
+r 							 - replay
+Enter						 - detail 
+e 							 - edit
+tab              - swith
+b 							 - save body
+```
+  
