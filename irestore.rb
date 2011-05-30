@@ -535,38 +535,28 @@ def do_restore
 end
 
 
-base_path = File.join(File.dirname(__FILE__) ,"ipsw-ram")
-p base_path
-
-ipsw_path = File.join(File.dirname(__FILE__) ,"ipsw-old")
-p ipsw_path
+dmg_path = "/Users/dli/ipad/jailbreak/ipsw/dmg"
+dmg_new_path = "/Users/dli/ipad/jailbreak/ipsw/dmg_new"
 
 PORT_ASR = 0x3930
 PORT_RESTORE = 0x7ef2
 
 # iOS 4.3.2
-# FILE_IBEC = "#{base_path}/Firmware/dfu/iBEC.n88ap.RELEASE.dfu"
-# FILE_APPLELOG = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/applelogo.s5l8920x.img3"
-# FILE_DEVICETREE = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3"
-# FILE_RAMDISK = "#{base_path}/038-1033-007.dmg"
-# FILE_KERNELCACHE = "#{base_path}/kernelcache.release.n88"
-# FILE_LLB = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/LLB.n88ap.RELEASE.img3"
-# FILE_IMGDIR = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production"
+# FILE_RAMDISK = "#{dmg_new_path}/038-1033-007.dmg"
 # 
-# FILE_MANIFEST = "#{ipsw_path}/Firmware/all_flash/all_flash.n88ap.production/manifest"
-# FILE_RESTOREDMG = "#{ipsw_path}/038-1022-007.dmg"
+# FILE_RESTOREDMG = "#{dmg_path}/038-1022-007.dmg"
 
 # iOS 4.3.3
-FILE_IBEC = "#{base_path}/Firmware/dfu/iBEC.n88ap.RELEASE.dfu"
-FILE_APPLELOG = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/applelogo.s5l8920x.img3"
-FILE_DEVICETREE = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3"
-FILE_RAMDISK = "#{base_path}/038-1447-003.dmg"
-FILE_KERNELCACHE = "#{base_path}/kernelcache.release.n88"
-FILE_LLB = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production/LLB.n88ap.RELEASE.img3"
-FILE_IMGDIR = "#{base_path}/Firmware/all_flash/all_flash.n88ap.production"
+FILE_IBEC = "#{dmg_new_path}/Firmware/dfu/iBEC.n88ap.RELEASE.dfu"
+FILE_APPLELOG = "#{dmg_new_path}/Firmware/all_flash/all_flash.n88ap.production/applelogo.s5l8920x.img3"
+FILE_DEVICETREE = "#{dmg_new_path}/Firmware/all_flash/all_flash.n88ap.production/DeviceTree.n88ap.img3"
+FILE_RAMDISK = "#{dmg_new_path}/038-1447-003.dmg"
+FILE_KERNELCACHE = "#{dmg_new_path}/kernelcache.release.n88"
+FILE_LLB = "#{dmg_new_path}/Firmware/all_flash/all_flash.n88ap.production/LLB.n88ap.RELEASE.img3"
+FILE_IMGDIR = "#{dmg_new_path}/Firmware/all_flash/all_flash.n88ap.production"
 
-FILE_MANIFEST = "#{ipsw_path}/Firmware/all_flash/all_flash.n88ap.production/manifest"
-FILE_RESTOREDMG = "#{ipsw_path}/038-1417-003.dmg"
+FILE_MANIFEST = "#{dmg_path}/Firmware/all_flash/all_flash.n88ap.production/manifest"
+FILE_RESTOREDMG = "#{dmg_path}/038-1417-003.dmg"
 
 def enter_restore
   devs = AppleDevice.available_devices

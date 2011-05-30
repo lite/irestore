@@ -5,17 +5,14 @@ $: << File.join(File.dirname(__FILE__), './osx-plist/lib')
 
 require 'socket'
 require 'openssl'
-require 'osx/plist'
 require 'pp'
 require 'stringio'
+require 'osx/plist'
 
 #socat -v tcp-l:27015,reuseaddr,fork unix:/var/run/usbmuxd &
 $path = "/var/run/usbmuxd"
 $tag = 0
 $version = 1  
-
-PLIST_FORMAT_XML = 0
-PLIST_FORMAT_BINARY = 1
 
 module DeviceSocket
   
