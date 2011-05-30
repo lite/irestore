@@ -1,22 +1,11 @@
+#!/usr/bin/env ruby
+# not utf-8
+
+$: << File.join(File.dirname(__FILE__), '.')
+
 require 'optparse'
-require File.dirname(__FILE__)+'/iservice'
-require File.dirname(__FILE__)+'/utils'
-
-options = {}
-
-optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: #{__FILE__} [options]"
-  
-  opts.on("-l", "--list", "list files") do |s|
-    options[:list] = s
-  end
-  opts.on("-h", "--help", "show usage") do |h|
-    puts opts
-    exit
-  end
-end.parse!
-
-p options    
+require 'iservice'
+require 'utils'
 
 class AFCService < DeviceService
   def initialize(port)
@@ -25,9 +14,15 @@ class AFCService < DeviceService
     
     @sequence_number = 0
   end
-  
-  def send_frame(type, data = "", header_size = data.length + 40)
+   
+	# typedef struct {
+	# 	char magic[AFC_MAGIC_LEN];
+	# 	uint64_t entire_length, this_length, packet_num, operation;
+	# } AFCPacket;
+	
+	def send_frame(type, data = "", header_size = data.length + 40)
     frame = "CFA6LPAA" + [data.length + 40, 0, header_size, 0, @sequence_number += 1, 0, type, 0].pack("V*") + data
+		p "==send_frame=="
     frame.hexdump
     @socket.write(frame)
   end
@@ -41,20 +36,23 @@ class AFCService < DeviceService
     sequence_number = @socket.read(8).unpack("V")[0] # Ignoring other 4 bytes
 
     header_rest = @socket.read(header_size - 32)
+		p "==recv_frame=="
+		p "header_size:#{header_size}, sequence_number:#{sequence_number}"
+		header_rest.hexdump
     
     frame = @socket.read(size - header_size)
-    frame.hexdump
-    frame
+		frame.hexdump
+    [header_rest, frame]
   end
   
   def sysinfo()
     send_frame(11)
-    Hash[*recv_frame().split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
+    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
   end
   
   def stat(path)
     send_frame(10, path + "\x00")
-    Hash[*recv_frame().split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
+    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
   end
   
   def mkdir(path)
@@ -64,23 +62,28 @@ class AFCService < DeviceService
   
   def ls(path)
     send_frame(3, path + "\x00")  
-    recv_frame.split("\x00")
+    recv_frame[1].split("\x00")
   end
   
   # 2 appears to be readable, 3 seems to create the file
   def open(path, mode = 2)
-    send_frame(13, [mode, 0].pack("V*") + path + "\x00")
-    recv_frame
+    send_frame(0xd, [mode, 0].pack("V*") + path + "\x00")
+    recv_frame[0].unpack("V")[0]
   end
   
-  def read(file_size)
-    send_frame(15, [1, 0, file_size, 0].pack("V*"))    
-    recv_frame
+  def read(handle, file_size)
+    send_frame(0xf, [1, 0, file_size, 0].pack("V*"))    
+    recv_frame[1]
   end
   
-  def write(data)
-    send_frame(16, [1, 0].pack("V*") + data, 48)
+  def write(handle, data)
+    send_frame(0x10, [1, 0].pack("V*") + data, 48)
+		recv_frame
   end
+
+	def close
+    send_frame(0x14, [1, 0].pack("V*") + data, 48)
+	end
 end
      
 if __FILE__ == $0
@@ -107,17 +110,53 @@ if __FILE__ == $0
   if @port
     port = @port>>8 | (@port & 0xff)<<8
     
-    p = AFCService.new(port) 
+    afc = AFCService.new(port) 
     puts "sysinfo"
-    p.sysinfo()
+    afc.sysinfo()
     puts "stat"  
-    p.stat("/iTunes_Control")  
+    afc.stat("/iTunes_Control")  
     puts "ls"  
-    p.ls("/iTunes_Control")
+    afc.ls("/iTunes_Control")
+    puts "test-write"
+		h = afc.open(File.join("PublicStaging", "test"), 3) 
+		pp h
+		buffer = "a*(200*1024)"
+		afc.write(h, buffer)
+    afc.close(h)
   end
 end
 
 __END__
+        
+AFC_OP_STATUS          = 0x00000001,	/* Status */
+AFC_OP_DATA            = 0x00000002,	/* Data */
+AFC_OP_READ_DIR        = 0x00000003,	/* ReadDir */
+AFC_OP_READ_FILE       = 0x00000004,	/* ReadFile */
+AFC_OP_WRITE_FILE      = 0x00000005,	/* WriteFile */
+AFC_OP_WRITE_PART      = 0x00000006,	/* WritePart */
+AFC_OP_TRUNCATE        = 0x00000007,	/* TruncateFile */
+AFC_OP_REMOVE_PATH     = 0x00000008,	/* RemovePath */
+AFC_OP_MAKE_DIR        = 0x00000009,	/* MakeDir */
+AFC_OP_GET_FILE_INFO   = 0x0000000a,	/* GetFileInfo */
+AFC_OP_GET_DEVINFO     = 0x0000000b,	/* GetDeviceInfo */
+AFC_OP_WRITE_FILE_ATOM = 0x0000000c,	/* WriteFileAtomic (tmp file+rename) */
+AFC_OP_FILE_OPEN       = 0x0000000d,	/* FileRefOpen */
+AFC_OP_FILE_OPEN_RES   = 0x0000000e,	/* FileRefOpenResult */
+AFC_OP_READ            = 0x0000000f,	/* FileRefRead */
+AFC_OP_WRITE           = 0x00000010,	/* FileRefWrite */
+AFC_OP_FILE_SEEK       = 0x00000011,	/* FileRefSeek */
+AFC_OP_FILE_TELL       = 0x00000012,	/* FileRefTell */
+AFC_OP_FILE_TELL_RES   = 0x00000013,	/* FileRefTellResult */
+AFC_OP_FILE_CLOSE      = 0x00000014,	/* FileRefClose */
+AFC_OP_FILE_SET_SIZE   = 0x00000015,	/* FileRefSetFileSize (ftruncate) */
+AFC_OP_GET_CON_INFO    = 0x00000016,	/* GetConnectionInfo */
+AFC_OP_SET_CON_OPTIONS = 0x00000017,	/* SetConnectionOptions */
+AFC_OP_RENAME_PATH     = 0x00000018,	/* RenamePath */
+AFC_OP_SET_FS_BS       = 0x00000019,	/* SetFSBlockSize (0x800000) */
+AFC_OP_SET_SOCKET_BS   = 0x0000001A,	/* SetSocketBlockSize (0x800000) */
+AFC_OP_FILE_LOCK       = 0x0000001B,	/* FileRefLock */
+AFC_OP_MAKE_LINK       = 0x0000001C,	/* MakeLink */
+AFC_OP_SET_FILE_TIME   = 0x0000001E 	/* set st_mtime */
 
 # sysinfo
 # 43 46 41 36 4c 50 41 41  28 00 00 00 00 00 00 00  CFA6LPAA(.......

@@ -1,32 +1,44 @@
-require 'optparse'
-require File.dirname(__FILE__)+'/iservice'
+#!/usr/bin/env ruby 
+# encoding: utf-8
 
-options = {}
+$: << File.join(File.dirname(__FILE__), '.')
 
-optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: #{__FILE__} [options]"
-  
-  opts.on("-f", "--finish", "finish notify") do |s|
-    options[:finish] = s
-  end
-  opts.on("-h", "--help", "show usage") do |h|
-    puts opts
-    exit
-  end
-end.parse!
+require 'iservice' 
+require 'observer'
 
-p options
+NOFITY_TYPE = [ 
+	"com.apple.itunes-mobdev.syncWillStart", 
+	"com.apple.itunes-mobdev.syncDidStart",  
+	"com.apple.itunes-mobdev.syncDidFinish", 
+]
 
-class INotifyService < DeviceService
-  def notify(finish)
-    if finish
-      obj = {"Command"=>"PostNotification", "Name" => "com.apple.itunes-mobdev.syncDidFinish" }
-    else
-      # "com.apple.itunes-mobdev.syncDidStart"
-      obj = {"Command"=>"PostNotification", "Name" => "com.apple.itunes-mobdev.syncWillStart" }
-    end
+class INotifyService < DeviceService 
+	include Observable 
+	
+  def notify(t_notify)
+    obj = {"Command"=>"PostNotification", "Name" => t_notify }
     write_plist(@socket, obj)
   end
+
+	def observe(t_event) 
+		obj = {"Command"=>"ObserveNotification", "Name" => t_event }
+    write_plist(@socket, obj)
+	end                        
+	
+	def run
+		lastPrice = nil
+    loop do
+			obj = read_plist(@socket)
+			# {"Command"=>"RelayNotification", "Name"=>"com.apple.mobile.application_uninstalled"}
+			if obj.include?("Command") and obj.include?("Name")
+				if obj["Command"] == "RelayNotification"
+					changed                 # notify observers
+					notify_observers(obj["Name"])
+				end
+			end      
+      sleep 1
+    end
+	end
 end
 
 if __FILE__ == $0
@@ -54,10 +66,14 @@ if __FILE__ == $0
     port = @port>>8 | (@port & 0xff)<<8
     
     p = INotifyService.new(port)
-    if options[:finish]
-      p.notify(true)
-    else
-      p.notify(false)
+    case ARGV[0]
+		when "nofity"
+			t_notify = NOFITY_TYPE[ARGV[2].to_i] 
+			p.notify(t_notify)
+		else 
+			t_event = "com.apple.mobile.application_uninstalled"
+      p.observe(t_event) 
+			p.output
     end
   end
 end

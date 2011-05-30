@@ -1,5 +1,10 @@
-require './iservice.rb'
-require 'pp'
+#!/usr/bin/env ruby 
+# encoding: utf-8
+
+$: << File.join(File.dirname(__FILE__), '.')
+                                            
+require 'pp'                                
+require 'iservice'
 
 if __FILE__ == $0
   l = DeviceRelay.new

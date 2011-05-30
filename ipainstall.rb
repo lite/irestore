@@ -1,49 +1,88 @@
-require 'optparse'
-require './iservice.rb'
+#!/usr/bin/env ruby 
+# encoding: utf-8
 
-options = {}
+$: << File.join(File.dirname(__FILE__), '.')
+                  
+require 'pathname'
+require 'zip/zipfilesystem'
+require 'iservice' 
+require 'iafctools'
+require 'inotify' 
 
-optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: #{__FILE__} [options]"
-  
-  opts.on("-f", "--finish", "finish notify") do |s|
-    options[:finish] = s
-  end
-  opts.on("-h", "--help", "show usage") do |h|
-    puts opts
-    exit
-  end
-end.parse!
+unless ARGV.size == 2
+  puts "Usage:   #{$0} 	action params"
+	puts "Example:      	i 'ipa/ARCHIVE.ipa'"
+	puts "					 			u 'com.evolonix.Linux-Reference-Guide'"
+  exit
+end 
 
-p options
-            
+p ARGV
 
-class CPIO
-  def initialize(input)
-    @io = input.kind_of?(String) ? StringIO.new(input) : input
-        
-    while true do
-      magic, dev, ino, mode, uid, gid, nlink, rdev, mtime, namesize, filesize = @io.read(76).unpack("a6a6a6a6a6a6a6a6a11a6a11")
+class IpaInstallService < DeviceService 
+	def install(ipa_path)
+		@is_work = true   
+		# i ipa/ARCHIVE.ipa  
+		# /ipa/ARCHIVE.ipa/Payload/Linux Reference Guide.app/SC_Info/Linux Reference Guide.sinf
+		app_sinf = ""
+		# /ipa/ARCHIVE.ipa/iTunesMetadata.plist
+		meta_data = ""
+		Zip::ZipFile.open(ipa_path) {|zipfile| 
+			Zip::ZipFile.foreach(ipa_path) do | entry |
+				# p entry
+				if entry.to_s == "iTunesMetadata.plist"
+					meta_data = zipfile.read(entry) 
+					meta_data.blob = true
+				elsif entry.to_s =~ /Payload\/.+app\/SC_Info\/.+sinf/
+					app_sinf = zipfile.read(entry)
+					app_sinf.blob = true 
+				end
+			end
+		}
+		                                                                    
+		obj = {"ClientOptions"=>{"ApplicationSINF" => app_sinf, "iTunesMetadata" => meta_data},
+			"Command" => "Install",
+			"PackagePath" => File.join("PublicStaging", Pathname.new(ipa_path).basename)
+		}
+		pp obj
+		write_plist(@socket, obj)
     
-      # Weird format uses octal ascii? 
-      file_name = @io.read(namesize.to_i(8)).chop
-      file_data = @io.read(filesize.to_i(8))
-            
-      break if file_name == "TRAILER!!!"
-      
-      puts file_name
-    end
   end
-end
-
-# -i "Linux 1.2.ipa"
-class IpaInstallService < DeviceService
-  def install(ipa_path)
+  def uninstall(app_id) 
+		@is_work = true                                       
+		# u APPID
+		# CFBundleIdentifier = "com.evolonix.Linux-Reference-Guide"
+		obj ={"Command" => "Uninstall", "ApplicationIdentifier" => app_id}
+		pp obj
+		write_plist(@socket, obj) 
+		
+  end
     
-  end
-  def uninstall(ipa_path)
-    
-  end
+	def update(t_event)
+		p "UPDATE"
+		@is_work = false 
+	end
+	
+	def wait         
+		# {"Status"=>"TakingInstallLock", "PercentComplete"=>0} 
+		# {"Status"=>"Complete"}
+		# {"Error"=>"APIInternalError"}
+		while @is_work do
+			obj = read_plist(@socket)
+			# pp obj
+			if obj.include?("Error")
+				p "ERROR" 
+				break
+			else obj.include?("Status")
+				case obj["Status"]
+				when "Complete"
+					p "COMPLETE" 
+					break
+				else   
+					p "#{obj["Status"]} == #{obj["PercentComplete"]}% == " 
+				end
+			end  
+	 	end
+	end
 end
 
 if __FILE__ == $0
@@ -51,7 +90,7 @@ if __FILE__ == $0
   
   l.query_type
   
-  pub_key = l.get_value("DevicePublicKey").read
+  pub_key = l.get_value("DevicePublicKey")
   p "pub_key:", pub_key
   #
   l.pair_device(pub_key)
@@ -62,23 +101,65 @@ if __FILE__ == $0
   p "session_id:", @session_id
   
   # ssl_enable
-  @port = l.start_service(AMSVC_NOTIFICATION_PROXY)
+  @notify_port = l.start_service(AMSVC_NOTIFICATION_PROXY) 
+	@afc_port = l.start_service(AMSVC_AFC)
+	@install_port = l.start_service(AMSVC_INSTALLATION_PROXY)
   # 
   l.stop_session(@session_id)
-  #
-  if @port
-    port = @port>>8 | (@port & 0xff)<<8
-    
-    p = INotifyService.new(port)
-    if options[:finish]
-      p.notify(true)
-    else
-      p.notify(false)
-    end
-  end
-end
+  # notify
+	if @notify_port
+		port = @notify_port>>8 | (@notify_port & 0xff)<<8
+		notify = INotifyService.new(port) 
+			
+		case ARGV[0]
+		when "install", "i"
+			ipa_path = ARGV[1]                  
+			# afc
+			if @afc_port
+		    port = @afc_port>>8 | (@afc_port & 0xff)<<8
+		    afc = AFCService.new(port)
+		  
+				p "Copying 'Linux 1.2.ipa' --> 'PublicStaging/Linux 1.2.ipa'" 
+				h = afc.open(File.join("PublicStaging", Pathname.new(ipa_path).basename), 3) 
+				
+				# buffer = File.open(ipa_path, "rb").read
+				# 			  afc.write(buffer)
+		    
+		    afc.close(h)
+		
+			end
+			# install
+			if @install_port
+				port = @install_port>>8 | (@install_port & 0xff)<<8
+		    inst = IpaInstallService.new(port)
+		
+				notify.add_observer(inst)
+				notify.observe("com.apple.mobile.application_installed")
+		 		
+				inst.install(ipa_path) 
+				
+				inst.wait   
+			end      
+		else 
+			# uninstall 
+			if @install_port                    
+				port = @install_port>>8 | (@install_port & 0xff)<<8
+		    inst = IpaInstallService.new(port) 
+				
+				notify.add_observer(inst)
+				notify.observe("com.apple.mobile.application_uninstalled")
+				
+				inst.uninstall(ARGV[1])  
+				
+				inst.wait  
+			end
+		end
+	end     
+end  
 
 __END__
+                                                       
+
 <key>Request</key>\n\t<string>StartService</string>\n\t<key>Service</key>\n\t<string>com.apple.mobile.notification_proxy</string>\n</d
 <key>Port</key>\n\t<integer>49320</integer>\n\t<key>Request</key>\n\t<string>StartService</string>\n\t<key>Result</key>\n\t<string>Success</string>\n\t<key>Service</key>\n\t<string>com.apple.mobile.notification_proxy</string>\n</dict>\n</plist>\n"
 <key>MessageType</key>\n\t<string>Connect</string>\n\t<key>DeviceID</key>\n\t<integer>35</integer>\n\t<key>PortNumber</key>\n\t<integer>43200</integer>\n\t<key>ProgName</key>\n\t<string>libusbmuxd</string>\n</dict>\n</plist>\n"

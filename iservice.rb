@@ -84,9 +84,14 @@ module DeviceSocket
 
   def write_plist(socket, data, fmt=:xml1)
     if data.kind_of?(Hash) || data.kind_of?(Array)
-      data = data.to_plist(fmt)  
+			if fmt == :xml1
+	      data = data.to_plist(fmt)  
+	    	p "==write_plist==#{data}"
+	 		else
+				pp "==write_plist==", data
+	      data = data.to_plist(fmt)  
+			end
     end
-    p "==write_plist==#{data}" 
     socket.write([data.length].pack("N") + data)
   end
   
@@ -95,8 +100,13 @@ module DeviceSocket
     if buffer 
       size = buffer.unpack("N")[0]
       buffer = socket.read(size)
-      p "==read_plist==#{buffer}" 
-      OSX::PropertyList.load(StringIO.new(buffer), fmt)[0]
+      data = OSX::PropertyList.load(StringIO.new(buffer), fmt)[0]
+			if fmt == :xml1
+	    	p "==read_plist==#{buffer}"
+	 		else
+				pp "==read_plist==", data
+			end
+			return data
     end
   end
     
@@ -350,6 +360,7 @@ AMSVC_BACKUP             = "com.apple.mobilebackup"
 AMSVC_CRASH_REPORT_COPY  = "com.apple.crashreportcopy"
 AMSVC_DEBUG_IMAGE_MOUNT  = "com.apple.mobile.debug_image_mount"
 AMSVC_NOTIFICATION_PROXY = "com.apple.mobile.notification_proxy"
+AMSVC_INSTALLATION_PROXY = "com.apple.mobile.installation_proxy"
 AMSVC_PURPLE_TEST        = "com.apple.purpletestr"
 AMSVC_SOFTWARE_UPDATE    = "com.apple.mobile.software_update"
 AMSVC_SYNC               = "com.apple.mobilesync"

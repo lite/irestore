@@ -1,8 +1,3 @@
-TODO
-----
-tss
-ipainstaller
-
 INFO
 ----
 #libimobiledevice
@@ -31,7 +26,7 @@ ln -sf ribusb/lib lib
 #use socat and idevicesyslog
 ```
 sudo /System/Library/PrivateFrameworks/MobileDevice.framework/Versions/A/Resources/usbmuxd &
-socat -v tcp-l:27015,reuseaddr,fork unix:/var/rusbmuxd
+socat -v tcp-l:27015,reuseaddr,fork unix:/var/run/usbmuxd &
 idevicesyslog
 ```
 

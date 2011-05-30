@@ -1,13 +1,19 @@
+#!/usr/bin/env ruby 
+# encoding: utf-8
+
+$: << File.join(File.dirname(__FILE__), '.')
+
 require 'optparse'
-require File.dirname(__FILE__)+'/iservice'
+require 'iservice'
+require 'utils'
 
 options = {}
 
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: #{__FILE__} [options]"
   
-  opts.on("-r", "--restore", "restore phonebook") do |s|
-    options[:restore] = s
+  opts.on("-c", "--clean", "clean phonebook") do |s|
+    options[:clean] = s
   end
   opts.on("-h", "--help", "show usage") do |h|
     puts opts
@@ -21,9 +27,15 @@ EMPTY_PARAMETER_STRING = "___EmptyParameterString___"
 MOBILESYNC_DATA_CLASS  = "com.apple.Contacts"
 MOBILESYNC_COMPUTER_ANCHOR = "2011-05-25 16:09:37 +0800" 
 MOBILESYNC_COMPUTER_CLASS_VERSION = 105
-  
+
+SYNC_TYPES = [
+    "SDSyncTypeFast",
+    "SDSyncTypeSlow",
+    "SDSyncTypeReset"
+]
+ 
 class IPBSyncService < DeviceService
-  def sync() 
+  def sync(do_clean) 
     while plist = read_plist(@socket, :binary1) do
 			case plist[0] 
 			when "DLMessageVersionExchange"
@@ -34,6 +46,7 @@ class IPBSyncService < DeviceService
 					MOBILESYNC_DATA_CLASS,"---", MOBILESYNC_COMPUTER_ANCHOR, MOBILESYNC_COMPUTER_CLASS_VERSION, EMPTY_PARAMETER_STRING]
 				write_plist(@socket, obj, :binary1)
 			when "SDMessageSyncDataClassWithComputer"
+				pp plist
 				obj = ["SDMessageGetAllRecordsFromDevice", MOBILESYNC_DATA_CLASS]
   			write_plist(@socket, obj, :binary1)  
 			when "SDMessageProcessChanges"       
@@ -54,33 +67,64 @@ class IPBSyncService < DeviceService
  			when "SDMessageDeviceReadyToReceiveChanges"
 				obj = ["DLMessagePing", "Preparing to get changes for device"]
   			write_plist(@socket, obj, :binary1)
-
-				## clear_all_records_on_device
-				obj = ["SDMessageClearAllRecordsOnDevice", MOBILESYNC_DATA_CLASS, EMPTY_PARAMETER_STRING] 
-				write_plist(@socket, obj, :binary1)    
-			when "SDMessageDeviceWillClearAllRecords"
-				pp plist 
-				## create_process_changes_message                                      
-				dummy_contact = {"12345"=> {"display as company"=>"person",
-				"first name"=>"lite","com.apple.syncservices.RecordEntityName"=>"com.apple.contacts.Contact"}}
-				# dummy_number = {"3/1/0"=> {"value"=>"1234567", 
-				# 	"com.apple.syncservices.RecordEntityName"=> "com.apple.contacts.Phone Number",
-				# 	"type"=>"mobile", "contact"=>["12345"]}}
-				obj = ["SDMessageProcessChanges", MOBILESYNC_DATA_CLASS, dummy_contact, true, EMPTY_PARAMETER_STRING] 
-				# obj = ["SDMessageProcessChanges", MOBILESYNC_DATA_CLASS, dummy_number, false, EMPTY_PARAMETER_STRING] 
-				write_plist(@socket, obj, :binary1) 
-				# SyncDeviceLinkAllRecordsOfPulledEntityTypeSentKey
-				# SyncDeviceLinkEntityNamesKey
-			when "SDMessageRemapRecordIdentifiers"
-				pp plist
+          
+				if do_clean
+					obj = ["SDMessageClearAllRecordsOnDevice", MOBILESYNC_DATA_CLASS, EMPTY_PARAMETER_STRING] 
+					write_plist(@socket, obj, :binary1)
+				else
+					@count = 2
+					@uuid = gen_uuid
+					@dev_uid = ""
+					## create_process_changes_message                                      
+					dummy_contact = {@uuid=> 
+						{"last name"=>"lite",
+				    "title"=>"title",
+				    "com.apple.syncservices.RecordEntityName"=>"com.apple.contacts.Contact",
+				    "first name"=>"kok"}}
+					params ={"SyncDeviceLinkAllRecordsOfPulledEntityTypeSentKey"=>true,
+					  "SyncDeviceLinkEntityNamesKey"=>
+					   ["com.apple.contacts.Contact", "com.apple.contacts.Group"]}
+					obj = ["SDMessageProcessChanges", MOBILESYNC_DATA_CLASS, dummy_contact, true, params] 
+					write_plist(@socket, obj, :binary1) 
+				end
+		 	when "SDMessageDeviceWillClearAllRecords"
 				obj = ["SDMessageFinishSessionOnDevice", MOBILESYNC_DATA_CLASS]
-        write_plist(@socket, obj, :binary1) 
-      when "SDMessageDeviceFinishedSession"
+			  write_plist(@socket, obj, :binary1)
+			when "SDMessageRemapRecordIdentifiers"
+				# ["SDMessageRemapRecordIdentifiers", "com.apple.Contacts", {"67E196C3-1439-8442-9AE3-0444C4949EF9"=>"3"}]
+				@count -= 1
+				if plist[2].include?(@uuid) 
+					@dev_uid = plist[2][@uuid]
+				end          
+				p @dev_uid, @count
+				case @count
+				when 1              
+					local_uid = gen_uuid
+					dummy_numbers =  {local_uid =>
+					   {"value"=>"1003",
+					    "com.apple.syncservices.RecordEntityName"=>
+					     "com.apple.contacts.Phone Number",
+					    "type"=>"mobile",
+					    "contact"=>[@dev_uid]}}
+					params = {"SyncDeviceLinkAllRecordsOfPulledEntityTypeSentKey"=>true,
+							  "SyncDeviceLinkEntityNamesKey"=>["com.apple.contacts.Phone Number"]}
+					obj = ["SDMessageProcessChanges", MOBILESYNC_DATA_CLASS, dummy_numbers, @count==0? true: false , params] 
+					write_plist(@socket, obj, :binary1)         
+				when 0
+					obj = ["SDMessageProcessChanges", MOBILESYNC_DATA_CLASS, {}, @count==0? true: false , params] 
+					write_plist(@socket, obj, :binary1)
+				else
+      		obj = ["SDMessageFinishSessionOnDevice", MOBILESYNC_DATA_CLASS]
+				  write_plist(@socket, obj, :binary1)  
+				end
+			when "SDMessageDeviceFinishedSession"
+				obj = ["DLMessageDisconnect", "All done, thanks for the memories"]
+				write_plist(@socket, obj, :binary1)   
 				p "All done."
 				break
 			else                                  
 				# "SDMessageRefuseToSyncDataClassWithComputer"  
-				# "SDMessageCancelSession"                   
+				# "SDMessageCancelSession"
 				p "Unknown command"        
 				pp plist  
 				obj = ["SDMessageCancelSession", MOBILESYNC_DATA_CLASS, "Unknown command"]
@@ -115,7 +159,7 @@ if __FILE__ == $0
     port = @port>>8 | (@port & 0xff)<<8
     
     p = IPBSyncService.new(port)
-    p.sync
+    p.sync(options[:clean])
   end
 end
 
