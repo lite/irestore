@@ -21,7 +21,7 @@ p ARGV
 class IpaInstallService < DeviceService 
 	def install(ipa_path)
 		@is_work = true   
-		# i ipa/ARCHIVE.ipa  
+		# ipainstall.rb i libimobiledevice/tools/ipa/ARCHIVE.ipa  
 		# /ipa/ARCHIVE.ipa/Payload/Linux Reference Guide.app/SC_Info/Linux Reference Guide.sinf
 		app_sinf = ""
 		# /ipa/ARCHIVE.ipa/iTunesMetadata.plist
@@ -49,7 +49,7 @@ class IpaInstallService < DeviceService
   end
   def uninstall(app_id) 
 		@is_work = true                                       
-		# u APPID
+		# ipainstall.rb u "com.evolonix.Linux-Reference-Guide"
 		# CFBundleIdentifier = "com.evolonix.Linux-Reference-Guide"
 		obj ={"Command" => "Uninstall", "ApplicationIdentifier" => app_id}
 		pp obj
@@ -107,51 +107,52 @@ if __FILE__ == $0
   # 
   l.stop_session(@session_id)
   # notify
+	if @afc_port
+	  port = @afc_port>>8 | (@afc_port & 0xff)<<8
+    @afc = AFCService.new(port)
+ 	end
+	if @install_port
+		port = @install_port>>8 | (@install_port & 0xff)<<8
+    @inst = IpaInstallService.new(port)
+  end
 	if @notify_port
 		port = @notify_port>>8 | (@notify_port & 0xff)<<8
-		notify = INotifyService.new(port) 
-			
+		@notify = INotifyService.new(port) 
+		@notify.add_observer(@inst)
+	end
+	if @notify
 		case ARGV[0]
 		when "install", "i"
 			ipa_path = ARGV[1]                  
-			# afc
+			
 			if @afc_port
-		    port = @afc_port>>8 | (@afc_port & 0xff)<<8
-		    afc = AFCService.new(port)
-		  
-				p "Copying 'Linux 1.2.ipa' --> 'PublicStaging/Linux 1.2.ipa'" 
-				h = afc.open(File.join("PublicStaging", Pathname.new(ipa_path).basename), 3) 
 				
-				# buffer = File.open(ipa_path, "rb").read
-				# 			  afc.write(buffer)
-		    
-		    afc.close(h)
-		
+				# afc
+	      p "Copying 'Linux 1.2.ipa' --> 'PublicStaging/Linux 1.2.ipa'" 
+				fpath = File.join("PublicStaging", Pathname.new(ipa_path).basename)
+				h = @afc.open(fpath, 3) 
+				io = File.open(ipa_path)
+				while chunk = io.read(8192-48)
+					@afc.write(h, chunk)
+				end
+		    @afc.close(h)
+		 	end
+			if @inst
+				# install
+		    @notify.observe("com.apple.mobile.application_installed")
+
+				@inst.install(ipa_path) 
+
+				@inst.wait     
 			end
-			# install
-			if @install_port
-				port = @install_port>>8 | (@install_port & 0xff)<<8
-		    inst = IpaInstallService.new(port)
-		
-				notify.add_observer(inst)
-				notify.observe("com.apple.mobile.application_installed")
-		 		
-				inst.install(ipa_path) 
-				
-				inst.wait   
-			end      
 		else 
 			# uninstall 
-			if @install_port                    
-				port = @install_port>>8 | (@install_port & 0xff)<<8
-		    inst = IpaInstallService.new(port) 
+			if @inst                    
+				@notify.observe("com.apple.mobile.application_uninstalled")
 				
-				notify.add_observer(inst)
-				notify.observe("com.apple.mobile.application_uninstalled")
+				@inst.uninstall(ARGV[1])  
 				
-				inst.uninstall(ARGV[1])  
-				
-				inst.wait  
+				@inst.wait  
 			end
 		end
 	end     

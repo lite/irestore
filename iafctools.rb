@@ -3,9 +3,9 @@
 
 $: << File.join(File.dirname(__FILE__), '.')
 
-require 'optparse'
 require 'iservice'
-require 'utils'
+require 'utils' 
+require 'stringio'
 
 class AFCService < DeviceService
   def initialize(port)
@@ -45,30 +45,30 @@ class AFCService < DeviceService
     [header_rest, frame]
   end
   
-  def sysinfo()
-    send_frame(11)
-    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
-  end
-  
-  def stat(path)
-    send_frame(10, path + "\x00")
-    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
-  end
-  
-  def mkdir(path)
-    send_frame(9, path + "\x00")
-    recv_frame()
-  end
-  
   def ls(path)
     send_frame(3, path + "\x00")  
     recv_frame[1].split("\x00")
+  end
+
+  def mkdir(path)
+    send_frame(9, path + "\x00")
+    recv_frame
+  end
+
+  def stat(path)
+    send_frame(0xa, path + "\x00")
+    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
+  end
+
+  def sysinfo()
+    send_frame(0xb)
+    Hash[*recv_frame()[1].split("\x00").map{|x| x.to_i.to_s == x ? x.to_i : x}]
   end
   
   # 2 appears to be readable, 3 seems to create the file
   def open(path, mode = 2)
     send_frame(0xd, [mode, 0].pack("V*") + path + "\x00")
-    recv_frame[0].unpack("V")[0]
+    recv_frame[0].unpack("V*")[2] 
   end
   
   def read(handle, file_size)
@@ -77,12 +77,13 @@ class AFCService < DeviceService
   end
   
   def write(handle, data)
-    send_frame(0x10, [1, 0].pack("V*") + data, 48)
+		send_frame(0x10, [handle, 0].pack("V*") + data, 48)
 		recv_frame
   end
 
-	def close
-    send_frame(0x14, [1, 0].pack("V*") + data, 48)
+	def close(handle)
+    send_frame(0x14, [handle, 0].pack("V*"))
+		recv_frame
 	end
 end
      
@@ -111,18 +112,39 @@ if __FILE__ == $0
     port = @port>>8 | (@port & 0xff)<<8
     
     afc = AFCService.new(port) 
-    puts "sysinfo"
+    #
+		puts "sysinfo"
     afc.sysinfo()
-    puts "stat"  
-    afc.stat("/iTunes_Control")  
-    puts "ls"  
-    afc.ls("/iTunes_Control")
-    puts "test-write"
-		h = afc.open(File.join("PublicStaging", "test"), 3) 
-		pp h
-		buffer = "a*(200*1024)"
-		afc.write(h, buffer)
-    afc.close(h)
+    #
+		puts "stat"  
+    afc.stat("PublicStaging")  
+    #
+		puts "test-write"
+		fpath = File.join("PublicStaging", "test")
+		h = afc.open(fpath, 3) 
+		io = StringIO.new("a"*(8*1024+99))
+		while chunk = io.read(8192-48)
+			afc.write(h, chunk)
+		end
+    afc.close(h)     
+		#
+		puts "ls"  
+    afc.ls("PublicStaging")
+		#
+		info = afc.stat(fpath)
+		pp info 
+		#
+		puts "test-read"
+		h = afc.open(File.join("PublicStaging", "test"), 2) 
+		while chunk = afc.read(h, 8*1024-48)
+			if chunk.length == 0
+				p "file EOF." 
+				break
+			else
+				p chunk.length
+			end 
+		end
+    afc.close(h)     
   end
 end
 
