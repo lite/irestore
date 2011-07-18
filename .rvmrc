@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+rvm --create use 1.9.2@irestore-win32
+
+if ! command -v bundle ; then
+  gem install bundler
+fi

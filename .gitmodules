@@ -4,3 +4,6 @@
 [submodule "tools/rverse"]
 	path = tools/rverse
 	url = git://github.com/copumpkin/rverse.git
+[submodule "libirecovery"]
+	path = libirecovery
+	url = git://github.com/Chronic-Dev/libirecovery.git
